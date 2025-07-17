@@ -1,0 +1,183 @@
+{
+  "name": "HumanDesign Knowledge Base",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "16R5t8rigwLfXpsBoWHv7ilbGQcoAOUou",
+          "mode": "list",
+          "cachedResultName": "Human Design",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/16R5t8rigwLfXpsBoWHv7ilbGQcoAOUou"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        64
+      ],
+      "id": "2988f3b0-c91e-4ea2-b994-ba2b986e6106",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "rHEoj1olMMkUps27",
+          "name": "Google Drive account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -304,
+        64
+      ],
+      "id": "8d599311-a33a-43f3-a582-8ff151341c99",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "rHEoj1olMMkUps27",
+          "name": "Google Drive account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "HumanDesign",
+          "mode": "list",
+          "cachedResultName": "HumanDesign"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        64
+      ],
+      "id": "ebe9374c-3d12-4a63-8222-687faff7430e",
+      "name": "Supabase Vector Store",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "VHHTEH3M05I8gV6W",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        48,
+        368
+      ],
+      "id": "796f6dd1-aac8-444d-ae16-3b62a0d23006",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "00BHDPkKgvKYpDP6",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        368
+      ],
+      "id": "3b25ffd8-32d2-4506-878c-0ae1e58a67f0",
+      "name": "Default Data Loader1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a232827a-5ca4-4e0a-bb13-25a81e292bcf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4bdf143a7a1d1437dd07da53fa8d8bdd96bd527f604eda3279b8bc2f2a18224b"
+  },
+  "id": "3ZAY7djt0LixJiAc",
+  "tags": []
+}
