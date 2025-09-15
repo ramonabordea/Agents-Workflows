@@ -1,0 +1,157 @@
+{
+  "name": "Elena",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Elenan8n",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        144
+      ],
+      "id": "c0e2a7c2-96b4-4a89-abf7-70cc7cf4f821",
+      "name": "Webhook",
+      "webhookId": "ddfa0b4a-1a09-4e8d-bf5a-cbb247b75b6a"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=",
+        "options": {
+          "systemMessage": "=You are an assistant receiving a summarised version of a discussion from ElenaAI bot and a person in {{ $json.body.transcriptsummary }}. You just forward this summarised transcript as an email using the gmail tool  "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        784,
+        144
+      ],
+      "id": "f78c7c90-3792-4512-908a-54bf15f556a1",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        656,
+        352
+      ],
+      "id": "afd6ae18-18a0-452e-9111-4ea411d7d6da",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "Boj8jSwHJZHUBymg",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ramona.nazarov17@gmail.com",
+        "subject": "Update on  conversation with Elena",
+        "message": "={{ $('Webhook').item.json.body.transcriptsummary }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1024,
+        352
+      ],
+      "id": "24344600-871e-4120-b79a-c44d00f2b145",
+      "name": "Send a message in Gmail",
+      "webhookId": "b0b7dbdc-1b32-4c42-acec-b713b2507fe7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fN4VnvFZefAYNhac",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "noData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1136,
+        144
+      ],
+      "id": "b99c739c-11b4-4c3b-84b5-6a59e810fdf2",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e6f9609e-6452-4742-b17b-316fda22ed81",
+  "meta": {
+    "instanceId": "37294ec00ff2b78afa453318cb9d78370439b62394f05645fc4a87b9477d9693"
+  },
+  "id": "8LSIvey3Ra343V2U",
+  "tags": []
+}
