@@ -1,0 +1,688 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Search Form",
+        "formDescription": "input your search query to create an audio version of a specific topic to learn",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Topic",
+              "placeholder": "vibe coding",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Period",
+              "placeholder": "last month",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        -176
+      ],
+      "id": "a56809fb-2c27-4db8-bc05-f27ea16af2c5",
+      "name": "On form submission",
+      "webhookId": "9877e0a7-0bac-44ee-adda-f6338b9c4ab9"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Prompt for the Agent:\n\nYou are a research and blog writing assistant integrated in n8n.\nYour workflow:\n\nResearch step: Use Perplexity to gather accurate, reliable, and up-to-date information on the given topic. Focus on insights, studies, facts, and examples that are useful for a general audience.\n\nWriting step: Based on the research, create a blog post tailored for an audience of mostly women.\n\nWriting guidelines:\n\nLength: around 500 words.\n\nStructure: exactly three paragraphs.\n\nBegin with a powerful, inspiring quote relevant to the topic.\n\nStyle: simple, clear, and friendly, avoiding jargon or complex terms.\n\nTone: supportive, approachable, and informative.\n\nNo emojis.\n\nOutput only the final blog post, no notes or explanations.\n\nFormat the text as markdown, well structured, easy to read\n\nTopic: \n{{ $json.Topic }}\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        304,
+        -176
+      ],
+      "id": "0c818194-fc50-4da7-a340-b4beb0d7b699",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "sonar",
+        "messages": {
+          "message": [
+            {
+              "content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message0_Text', ``, 'string') }}"
+            }
+          ]
+        },
+        "simplify": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify_Output', ``, 'boolean') }}",
+        "options": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.perplexityTool",
+      "typeVersion": 1,
+      "position": [
+        416,
+        32
+      ],
+      "id": "4885be18-c463-418d-8a05-5cba5bdd4d19",
+      "name": "Message a model in Perplexity",
+      "credentials": {
+        "perplexityApi": {
+          "id": "v1UND538krdHZ19H",
+          "name": "Perplexity account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        176,
+        -16
+      ],
+      "id": "42582249-6e85-478e-a297-b013dbd339d7",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Boj8jSwHJZHUBymg",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=message"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        272,
+        96
+      ],
+      "id": "364bb2fe-9fc8-4f9b-9818-79b7b4c0f662",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sendTo": "ramona.nazarov17@gmail.com",
+        "subject": "From n8n summary",
+        "message": "=hei, here is the summary of your topic {{ $('On form submission').item.json.Topic }} and the corresponding image in attachement\n\n\n{{ $('AI Agent').item.json.output }} ",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1376,
+        -448
+      ],
+      "id": "265f4f00-a009-4832-9c9d-28d6cc079847",
+      "name": "Send a message",
+      "webhookId": "5ec07592-2359-4a7c-8620-346cd41f77cb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fN4VnvFZefAYNhac",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "classify",
+        "input": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        624,
+        -400
+      ],
+      "id": "bfac1626-7ba7-418a-8033-ab9580c9bfe4",
+      "name": "Classify text for violations",
+      "credentials": {
+        "openAiApi": {
+          "id": "Boj8jSwHJZHUBymg",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.flagged }}",
+                    "rightValue": false,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    },
+                    "id": "2b17dcb2-2b5f-4186-9129-d3b9b2f57098"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e62ecc43-a8f3-4c83-85c7-fb96ca829fad",
+                    "leftValue": "={{ $json.flagged }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        832,
+        -400
+      ],
+      "id": "9c5cd5b1-b530-44e3-85a6-3aa601b33b21",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "ramona.nazarov17@gmail.com",
+        "subject": "We identified an ethical problem in your workflow ",
+        "message": "There was a bias or ethics deviation, therefore we cannot forward the output of the workflow",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1568,
+        -176
+      ],
+      "id": "4cab6c8e-1065-4f08-96f0-d69a8b91f98a",
+      "name": "Send a message1",
+      "webhookId": "d6f0658b-ba31-4fcd-b6bd-50ff8f8067e2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fN4VnvFZefAYNhac",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1gctRSiJitjkEPJiMWYOAB7Z7pngYQYydQBT3oKVjxDs",
+          "mode": "list",
+          "cachedResultName": "Eval Perplexity",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gctRSiJitjkEPJiMWYOAB7Z7pngYQYydQBT3oKVjxDs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gctRSiJitjkEPJiMWYOAB7Z7pngYQYydQBT3oKVjxDs/edit#gid=0"
+        },
+        "outputs": {
+          "values": [
+            {
+              "outputName": "output",
+              "outputValue": "={{ $json.output }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.7,
+      "position": [
+        1840,
+        -496
+      ],
+      "id": "03acf56b-24f3-4788-a405-c29d65129cdb",
+      "name": "Evaluation",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8KjYuD2McAAK7Uzi",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "setMetrics",
+        "metric": "helpfulness",
+        "userQuery": "query",
+        "actualAnswer": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.7,
+      "position": [
+        2016,
+        -496
+      ],
+      "id": "f191a95d-b0a1-4006-b971-e2052af0f609",
+      "name": "Evaluation1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        -400
+      ],
+      "id": "c02e7433-64f3-41f8-b6ef-e31269611a50",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "Boj8jSwHJZHUBymg",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "3ad18a85-0a48-43f0-b229-dcd8ee020a92"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        64
+      ],
+      "id": "e76411c1-f9a6-4b79-95d5-d8ea925188a8",
+      "name": "MCP Server Trigger",
+      "webhookId": "3ad18a85-0a48-43f0-b229-dcd8ee020a92"
+    },
+    {
+      "parameters": {
+        "sendTo": "ramona.nazarov17@gmail.com",
+        "subject": "hello",
+        "message": "hello",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1392,
+        192
+      ],
+      "id": "2cd72c0f-9caa-4026-b5e7-59448bfe071e",
+      "name": "Send a message in Gmail",
+      "webhookId": "6655ef2c-8ba4-426b-abc0-9c96538c1a01",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fN4VnvFZefAYNhac",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Ee5sKuDqlLSL_DtmL7B6wgelqhdorVk-Kj-_jU0Chkc",
+          "mode": "list",
+          "cachedResultName": "Potential customers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ee5sKuDqlLSL_DtmL7B6wgelqhdorVk-Kj-_jU0Chkc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ee5sKuDqlLSL_DtmL7B6wgelqhdorVk-Kj-_jU0Chkc/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        208
+      ],
+      "id": "b441ff46-e0c6-4713-b6d3-3ce5c3bd067e",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8KjYuD2McAAK7Uzi",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTool",
+      "typeVersion": 3,
+      "position": [
+        1280,
+        320
+      ],
+      "id": "d4904762-90b1-48a8-8e66-8ab4733add4f",
+      "name": "Upload file in Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "QoYOvUitrcVqsRrd",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "ramona.nazarov17@gmail.com",
+          "mode": "list",
+          "cachedResultName": "Ramona - Personal"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1136,
+        320
+      ],
+      "id": "ecf84d89-808b-4021-87e4-b6847b65c076",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "FQHVyAg2UowiT50E",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "=Generate a image representative for the topic  {{ $('On form submission').item.json.Topic }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1120,
+        -448
+      ],
+      "id": "79c5d91e-1737-4fdd-8d86-d392e5386909",
+      "name": "Generate an image",
+      "credentials": {
+        "openAiApi": {
+          "id": "Boj8jSwHJZHUBymg",
+          "name": "OpenAi account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Classify text for violations": [
+      {
+        "json": {
+          "flagged": false,
+          "categories": {
+            "sexual": false,
+            "hate": false,
+            "harassment": false,
+            "self-harm": false,
+            "sexual/minors": false,
+            "hate/threatening": false,
+            "violence/graphic": false,
+            "self-harm/intent": false,
+            "self-harm/instructions": false,
+            "harassment/threatening": false,
+            "violence": false
+          },
+          "category_scores": {
+            "sexual": 0.000030835937650408596,
+            "hate": 0.00002124114689650014,
+            "harassment": 0.00004962350067216903,
+            "self-harm": 2.6041522716013787e-8,
+            "sexual/minors": 0.000006989691428316291,
+            "hate/threatening": 0.0000028926158393005608,
+            "violence/graphic": 0.0000027621047138381982,
+            "self-harm/intent": 9.215311180810204e-9,
+            "self-harm/instructions": 1.9641694493088835e-8,
+            "harassment/threatening": 0.000002971058847833774,
+            "violence": 0.0003467162314336747
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model in Perplexity": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Classify text for violations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify text for violations": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Generate an image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluation": {
+      "main": [
+        [
+          {
+            "node": "Evaluation1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Evaluation1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file in Google Drive": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5f73b54a-fe2d-438f-97d2-50e154fc7f95",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "37294ec00ff2b78afa453318cb9d78370439b62394f05645fc4a87b9477d9693"
+  },
+  "id": "7aRypDZ312oitMtJ",
+  "tags": []
+}
